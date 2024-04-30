@@ -43,6 +43,7 @@ app.on('web-contents-created', (_, contents) => {
    */
   contents.on('will-navigate', (event, url) => {
     const {origin} = new URL(url);
+
     if (ALLOWED_ORIGINS_AND_PERMISSIONS.has(origin)) {
       return;
     }
@@ -85,14 +86,15 @@ app.on('web-contents-created', (_, contents) => {
   contents.setWindowOpenHandler(({url}) => {
     const {origin} = new URL(url);
 
+    // shell.openExternal(url)
     if (ALLOWED_EXTERNAL_ORIGINS.has(origin as `https://${string}`)) {
       // Open url in default browser.
+      console.log(`Opening external URL: ${url}`)
       shell.openExternal(url).catch(console.error);
     } else if (import.meta.env.DEV) {
       console.warn(`Blocked the opening of a disallowed origin: ${origin}`);
     }
 
-    // Prevent creating a new window.
     return {action: 'deny'};
   });
 
