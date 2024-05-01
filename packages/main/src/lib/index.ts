@@ -121,3 +121,4 @@ export const deleteNote: DeleteNote = async filename => {
   await remove(`${rootDir}/${filename}.md`);
   return true;
 };
+

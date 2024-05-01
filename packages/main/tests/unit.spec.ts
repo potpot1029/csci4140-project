@@ -28,6 +28,7 @@ vi.mock('electron', () => {
     },
   };
 
+
   return {BrowserWindow: bw, app};
 });
 

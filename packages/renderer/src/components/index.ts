@@ -5,3 +5,5 @@ export * from './editor';
 export * from './preview';
 export * from './note-title';
 export * from './buttons';
+
+export * from './chatbot';

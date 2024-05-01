@@ -27,12 +27,15 @@ export const Note = () => {
   );
 
   return (
-    <div className='flex flex-row'>
+    <div className="flex flex-row">
       <Editor
         key={selectedNote.title}
         onChange={handleAutoSaving}
       />
-      <Preview />
+      <Preview
+        className="bg-transparent p-2 overflow-auto text-slate-300"
+        content={selectedNote.content}
+      />
     </div>
   );
 };

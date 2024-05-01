@@ -1,6 +1,5 @@
-import { createNote, deleteNote, getNotes, readNote, writeNote } from './lib'
-import type { CreateNote, DeleteNote, GetNotes, ReadNote, WriteNote } from '@shared/types'
-import {app, BrowserWindow, ipcMain} from 'electron';
+
+import {app, BrowserWindow} from 'electron';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -67,13 +66,9 @@ async function createWindow() {
  */
 export async function restoreOrCreateWindow() {
   let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed());
+  
 
   if (window === undefined) {
-    ipcMain.handle('getNotes', (_, ...args: Parameters<GetNotes>) => getNotes(...args));
-    ipcMain.handle('readNote', (_, ...args: Parameters<ReadNote>) => readNote(...args));
-    ipcMain.handle('writeNote', (_, ...args: Parameters<WriteNote>) => writeNote(...args));
-    ipcMain.handle('createNote', (_, ...args: Parameters<CreateNote>) => createNote(...args));
-    ipcMain.handle('deleteNote', (_, ...args: Parameters<DeleteNote>) => deleteNote(...args));
     window = await createWindow();
   }
 

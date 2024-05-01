@@ -10,7 +10,7 @@ export const NoteTitle = ({className, ...props}: ComponentProps<'div'>) => {
 
   return (
     <div
-      className={twMerge('flex justify-center', className)}
+      className={twMerge('', className)}
       {...props}
     >
       <span className="text-gray-400">{selectedNote.title}</span>

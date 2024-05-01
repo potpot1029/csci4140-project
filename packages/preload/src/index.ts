@@ -10,11 +10,6 @@ import type {CreateNote, DeleteNote, GetNotes, ReadNote, WriteNote} from '@share
 import {contextBridge, ipcRenderer} from 'electron';
 
 
-
-if (!process.contextIsolated) {
-  throw new Error('contextIsolated must be enabled in the BrowserWindow');
-}
-
 try {
   contextBridge.exposeInMainWorld('context', {
     locale: navigator.language,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import * as prod from 'react/jsx-runtime';
 import Markdown from 'react-markdown';
 import {defaultSchema} from 'hast-util-sanitize';
@@ -8,14 +8,16 @@ import wikiLinkPlugin from 'remark-wiki-link';
 import 'github-markdown-css/github-markdown.css';
 import {useAtomValue} from 'jotai';
 import {selectedNoteAtom} from '../store';
+import { twMerge } from 'tailwind-merge';
 
-export const Preview: React.FC = props => {
-  const selectedNote = useAtomValue(selectedNoteAtom);
-  const md = selectedNote?.content || '';
+export type PreviewProps = {
+  content: string;
+} & ComponentProps<'div'>;
 
+export const Preview = ({content, className, ...props}: PreviewProps) => {
   return (
     <Markdown
-      className="markdown-body bg-transparent p-2 overflow-auto text-slate-300"
+      className={twMerge("markdown-body", className)}
       remarkPlugins={[
         remarkGfm,
         [
@@ -42,7 +44,7 @@ export const Preview: React.FC = props => {
         }
       }}
     >
-      {md}
+      {content}
     </Markdown>
   );
 };

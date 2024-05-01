@@ -8,9 +8,17 @@ This project is built with:
 - [Tailwind CSS](https://tailwindcss.com/): for styling
 - [CodeMirror](https://codemirror.net/): for code editor
 - [remarkjs/react-markdown](https://github.com/remarkjs/react-markdown): for markdown parsing
+- [LangChain](https://langchain.com/): for integrating LLMs into the app
+- [Ollama](https://ollama.com/): for using LLMs locally
 
 ## Get Started
 
+Install [Ollama](https://ollama.com/) and download Llama3 locally using the following command:
+```bash
+ollama pull llama3
+```
+
+With Ollama opened, run the following commands to start the app:
 ```bash
 # Install dependencies
 npm i

@@ -1,4 +1,14 @@
-import type {NoteInfo} from '@shared/models'
+import type {ChatMessage, NoteInfo} from '@shared/models'
+export const chatMessagesMock: ChatMessage[] = [
+    {
+        type: 'bot',
+        content: 'Hello! How can I help you today?'
+    },
+    {
+        type: 'user',
+        content: `*hi*, Do you know what LLM is?`
+    },
+]
 
 export const notesMock: NoteInfo[] = [
     {
