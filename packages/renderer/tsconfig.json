@@ -16,13 +16,16 @@
       "/@/*": ["./src/*"],
       "@shared/*": ["../shared/*"],
     },
-    "lib": ["ESNext", "dom", "dom.iterable"]
+    "lib": ["ESNext", "dom", "dom.iterable"],
+    "allowJs": true,
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "types/**/*.d.ts",
     "../../types/**/*.d.ts"
-, "src/components/chatbot/llm/vectorDB-manager.ts", "src/components/chatbot/langchain-processor.ts"  ],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts", "pouchdb-8.0.1.min.js"]
+, "src/components/chatbot/llm/vectorDB-manager.ts", "src/components/chatbot/langchain-processor.ts", "./pouchdb-8.0.1.min.js"],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"],
+  "nocheck": ["./pouchdb-8.0.1.min.js"]
+
 }

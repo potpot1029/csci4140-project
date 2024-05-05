@@ -22,7 +22,6 @@ import PromptManager from './prompt-manager';
 import type {BaseChatMemory} from 'langchain/memory';
 import {extractChatHistory, extractUniqueTitlesFromDocs} from './utils';
 import { loadNotes } from '/@/store';
-import type PouchDB from 'pouchdb-browser';
 
 export default class ChainManager {
   private static chain: RunnableSequence;

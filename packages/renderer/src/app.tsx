@@ -1,25 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  RootLayout,
-  Sidebar,
-  Content,
-  Note,
-  NotesList,
-  NoteTitle,
-  Chat,
-  ShowChatButton,
-  EditorButtonsRow,
   MainPage,
 } from '/@/components';
-import {ButtonsRow} from './components/buttons-row';
-import {cn} from './utils';
-import {ResizableComponent} from './components/resizeable-component';
 import {InitializationPage} from './components/settings/init-page';
 import {defaultSettings} from '@shared/constants';
 import {ChainOptions, ChainType, LangChainParams, NoteFile} from '@shared/models';
 import VectorDBManager, {VectorStoreDocument} from './components/chatbot/llm/vectorDB-manager';
-import {useAtomValue} from 'jotai';
-import {notesAtom} from './store';
 import EmbeddingManager from './components/chatbot/llm/embedding-manager';
 import ChainManager from './components/chatbot/llm/chain-manager';
 
