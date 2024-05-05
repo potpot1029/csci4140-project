@@ -1,6 +1,6 @@
 import React from 'react';
 import Textarea from '@mui/joy/Textarea';
-import CircularProgress from '@mui/joy/CircularProgress';
+import { CircularProgress } from "@mui/material";
 
 export type ChatInputProps = {
   userInput: string;
@@ -41,8 +41,10 @@ export const ChatInput = ({
       <div className="ml-2 flex justify-center items-center h-full">
         {isLoading ? (
           <CircularProgress
-            size="sm"
-            color="neutral"
+            size={32}
+            thickness={5}
+            style={{ color: "rgb(209 213 219 / var(--tw-bg-opacity))" }}
+            className="color-zinc-800"
           />
         ) : (
           <button

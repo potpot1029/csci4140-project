@@ -15,6 +15,6 @@
       "@shared/*": ["../shared/*"],
     }
   },
-  "include": ["src/**/*.ts", "../../types/**/*.d.ts"],
+  "include": ["src/**/*.ts", "../../types/**/*.d.ts", "../renderer/src/pouchdb-8.0.1.min.js"],
   "exclude": ["**/*.spec.ts", "**/*.test.ts"]
 }

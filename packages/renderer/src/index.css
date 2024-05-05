@@ -2,20 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  #root {
-    @apply h-screen w-screen;
-  }
-
-  html,
-  body {
-    @apply h-screen w-screen;
-
-    @apply bg-transparent;
-
-    @apply font-mono antialiased text-white;
-    
-
-    @apply overflow-hidden;
-  }
+#root {
+  @apply h-screen w-screen;
 }
+
+html,
+body {
+  @apply h-screen w-screen;
+
+  @apply bg-transparent;
+
+  @apply antialiased text-white;
+
+  @apply overflow-hidden;
+}
+
+.cm-line { z-index: 0 }

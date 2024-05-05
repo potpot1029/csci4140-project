@@ -1,8 +1,8 @@
 import {app, ipcMain} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
-import {createNote, deleteNote, getNotes, readNote, writeNote} from './lib';
-import type {CreateNote, DeleteNote, GetNotes, ReadNote, WriteNote} from '@shared/types';
+import {createNote, deleteNote, getNotes, getVaultDirectory, readNote, selectDirectory, showFileItemContextMenu, writeNote} from './lib';
+import type {CreateNote, DeleteNote, GetNotes, GetVaultDirectory, ReadNote, SelectDirectory, ShowFileItemContextMenu, WriteNote} from '@shared/types';
 import {platform} from 'node:process';
 import updater from 'electron-updater';
 
@@ -38,14 +38,11 @@ app.on('activate', restoreOrCreateWindow);
 /**
  * Create the application window when the background process is ready.
  */
+
 app
   .whenReady()
   .then(() => {
-    ipcMain.handle('getNotes', (_, ...args: Parameters<GetNotes>) => getNotes(...args));
-    ipcMain.handle('readNote', (_, ...args: Parameters<ReadNote>) => readNote(...args));
-    ipcMain.handle('writeNote', (_, ...args: Parameters<WriteNote>) => writeNote(...args));
-    ipcMain.handle('createNote', (_, ...args: Parameters<CreateNote>) => createNote(...args));
-    ipcMain.handle('deleteNote', (_, ...args: Parameters<DeleteNote>) => deleteNote(...args));
+
     restoreOrCreateWindow();
   })
   .catch(e => console.error('Failed create window:', e));
@@ -87,3 +84,13 @@ if (import.meta.env.PROD) {
     .then(() => updater.autoUpdater.checkForUpdatesAndNotify())
     .catch(e => console.error('Failed check and install updates:', e));
 }
+
+
+ipcMain.handle('getNotes', (_, ...args: Parameters<GetNotes>) => getNotes(...args));
+ipcMain.handle('readNote', (_, ...args: Parameters<ReadNote>) => readNote(...args));
+ipcMain.handle('writeNote', (_, ...args: Parameters<WriteNote>) => writeNote(...args));
+ipcMain.handle('createNote', (_, ...args: Parameters<CreateNote>) => createNote(...args));
+ipcMain.handle('deleteNote', (_, ...args: Parameters<DeleteNote>) => deleteNote(...args));
+ipcMain.handle('showFileItemContextMenu', (_, ...args: Parameters<ShowFileItemContextMenu>) => showFileItemContextMenu(...args));
+ipcMain.handle('selectDirectory', (_, ...args: Parameters<SelectDirectory>) => selectDirectory(...args));
+ipcMain.handle('getVaultDirectory', (_, ...args: Parameters<GetVaultDirectory>) => getVaultDirectory(...args));

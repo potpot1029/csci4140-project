@@ -1,60 +1,69 @@
-import type {NoteContent, NoteInfo} from '@shared/models';
+import {
+  type ChatMessage,
+  type NoteContent,
+  type NoteFile,
+} from '@shared/models';
 import {atom} from 'jotai';
 import {unwrap} from 'jotai/utils';
+import type ChainManager from '../components/chatbot/llm/chain-manager';
 
-const loadNotes = async () => {
+export const loadNotes = async () => {
   const notes = await window.context.getNotes();
   // sorted by last edit time
-  return notes.sort((a, b) => b.lastEditTime - a.lastEditTime);
+  return notes.sort((a, b) => (b.basename > a.basename ? -1 : 1));
 };
 
-const notesAtomAsync = atom<NoteInfo[] | Promise<NoteInfo[]>>(loadNotes());
+// All notes
+const notesAtomAsync = atom<NoteFile[] | Promise<NoteFile[]>>(loadNotes());
 export const notesAtom = unwrap(notesAtomAsync, prev => prev);
-export const selectedNoteIndexAtom = atom<number | null>(null);
 
+// Currently selected note
+export const selectedNoteIndexAtom = atom<number | null>(null);
 const selectedNoteAtomAsync = atom(async get => {
   const notes = get(notesAtom);
   const selectedNoteIndex = get(selectedNoteIndexAtom);
 
   if (!notes || selectedNoteIndex == null) return null;
   const selectedNote = notes[selectedNoteIndex];
-  console.log('selectedNote', selectedNote.title);
+  console.log('selectedNote', selectedNote.basename);
 
-  const noteContent = await window.context.readNote(selectedNote.title)
 
-  return {
-    ...selectedNote,
-    content: noteContent,
-  };
+  return selectedNote
 });
 export const selectedNoteAtom = unwrap(
   selectedNoteAtomAsync,
   prev =>
     prev ?? {
-      title: '',
+      path: '',
+      basename: '',
+      mtime: Date.now(),
       content: '',
-      lastEditTime: Date.now(),
+      metadata: { title: '', path: ''},
     },
 );
 
+// Save the content of the selected note
 export const saveNoteAtom = atom(null, async (get, set, content: NoteContent) => {
   const notes = get(notesAtom);
   const selectedNote = get(selectedNoteAtom);
   if (!selectedNote || !notes) return;
 
-  if (!selectedNote.title) {
+  if (!selectedNote.metadata.title) {
     console.error('No selected note');
     return;
   }
-  await window.context.writeNote(selectedNote.title, content);
+
+  console.info("New content:", content);
+  await window.context.writeNote(selectedNote.metadata.title, content);
 
   set(
     notesAtom,
     notes.map(note => {
-      if (note.title === selectedNote.title) {
+      if (note.metadata.title === selectedNote.metadata.title) {
         return {
           ...note,
-          lastEditTime: Date.now(),
+          content: content,
+          mtime: Date.now(),
         };
       }
       return note;
@@ -62,21 +71,37 @@ export const saveNoteAtom = atom(null, async (get, set, content: NoteContent) =>
   );
 });
 
-export const createEmptyNoteAtom = atom(null, async (get, set) => {
+export const getNoteByTitleAtom = atom(null, (get, set, title: string) => {
+  const notes = get(notesAtom);
+  if (!notes) return null;
+
+  return notes.find(note => note.basename === title);
+});
+
+// Create a new note (or open an existing one with the same title)
+export const createEmptyNoteAtom = atom(null, async (get, set, title: string) => {
   const notes = get(notesAtom);
   if (!notes) return;
 
-  const title = await window.context.createNote();
+  const newNote = await window.context.createNote(title);
 
-  if (!title) {
+  if (!newNote) {
     console.error('Failed to create note');
     return;
   }
 
-  const newNote: NoteInfo = {
-    title,
-    lastEditTime: Date.now(),
-  };
-  set(notesAtom, [newNote, ...notes.filter((note) => note.title !== newNote.title)]);
+  set(notesAtom, [newNote, ...notes.filter(note => note.basename !== newNote.basename)]);
   set(selectedNoteIndexAtom, 0);
-})
+});
+
+export const chatHistoryAtom = atom<ChatMessage[]>([]);
+
+export const addChatMessageAtom = atom(null, (get, set, message: ChatMessage) => {
+  set(chatHistoryAtom, [...get(chatHistoryAtom), message]);
+});
+
+export const clearChatHistoryAtom = atom(null, (get, set) => {
+  set(chatHistoryAtom, []);
+});
+
+export const chainManagerAtom = atom<ChainManager | null>(null);

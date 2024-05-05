@@ -7,7 +7,10 @@ import {NoteContent} from '@shared/models';
 const {throttle} = lodash;
 import {autoSavingTime} from '@shared/constants';
 
-export const Note = () => {
+export type NoteProps = {
+  showNotes: boolean;
+} & ComponentProps<'div'>;
+export const Note = ({showNotes, ...props}: NoteProps) => {
   const selectedNote = useAtomValue(selectedNoteAtom);
   const saveNote = useSetAtom(saveNoteAtom);
 
@@ -16,7 +19,7 @@ export const Note = () => {
   const handleAutoSaving = throttle(
     async (content: NoteContent) => {
       if (!selectedNote) return;
-      console.log('Auto Saving Note:', selectedNote.title);
+      console.log('Auto Saving Note:', selectedNote.metadata.title);
       await saveNote(content);
     },
     autoSavingTime,
@@ -29,7 +32,7 @@ export const Note = () => {
   return (
     <div className="flex flex-row">
       <Editor
-        key={selectedNote.title}
+        key={selectedNote.metadata.title}
         onChange={handleAutoSaving}
       />
       <Preview

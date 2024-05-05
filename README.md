@@ -13,9 +13,18 @@ This project is built with:
 
 ## Get Started
 
+For now, you have to set the directory for your notes in `packages/shared/constants.ts`.
+```typescript
+export const appDirectoryName = "'~/TwoBrain'";
+```
+
 Install [Ollama](https://ollama.com/) and download Llama3 locally using the following command:
 ```bash
 ollama pull llama3
+```
+Don't forget to download the embedding model as well:
+```bash
+ollama pull nomic-embed-text
 ```
 
 With Ollama opened, run the following commands to start the app:
@@ -30,3 +39,4 @@ npm run watch
 Many thanks to the following resources:
 - [CodeWithGionatha-Labs/NoteMark](https://github.com/CodeWithGionatha-Labs/NoteMark)
 - [craftzdog/electron-markdown-editor-tutorial](https://github.com/craftzdog/electron-markdown-editor-tutorial)
+- [logancyang/obsidian-copilot](https://github.com/logancyang/obsidian-copilot)

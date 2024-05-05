@@ -5,7 +5,6 @@ import {
   keymap,
   highlightActiveLineGutter,
   highlightActiveLine,
-  lineNumbers,
 } from '@codemirror/view';
 import {history, defaultKeymap, historyKeymap} from '@codemirror/commands';
 import {
@@ -69,7 +68,6 @@ const useCodeMirror = <T extends Element>(
       doc: props.initialDoc,
       extensions: [
         keymap.of([...defaultKeymap, ...historyKeymap]),
-        lineNumbers(),
         highlightActiveLineGutter(),
         history(),
         indentOnInput(),

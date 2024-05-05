@@ -1,16 +1,15 @@
 import {appDirectoryName, fileEncoding, welcomeNoteFilename} from '@shared/constants';
-import type {NoteInfo} from '@shared/models';
+import type {NoteFile} from '@shared/models';
 import type {CreateNote, DeleteNote, GetNotes, ReadNote, WriteNote} from '@shared/types';
-import {dialog} from 'electron';
-import fs_extra  from 'fs-extra';
+import {dialog, Menu, MenuItem} from 'electron';
+import fs_extra from 'fs-extra';
 const {ensureDir, readFile, readdir, remove, stat, writeFile} = fs_extra;
 import lodash from 'lodash';
 const {isEmpty} = lodash;
-import {homedir} from 'os';
-import path from 'path';
+import {basename} from 'path';
 
 export const getRootDir = () => {
-  return `${homedir()}/${appDirectoryName}`;
+  return `${appDirectoryName}`;
 };
 
 export const getNotes: GetNotes = async () => {
@@ -24,12 +23,14 @@ export const getNotes: GetNotes = async () => {
   });
 
   const notes = notesFileNames.filter(fileName => fileName.endsWith('.md'));
-  console.log(notes)
+  // console.info('Found notes:', notes);
 
   if (isEmpty(notes)) {
     console.info('No notes found, creating a welcome note');
 
-    const content = await readFile(`${rootDir}/buildResources/helloWorld.md`, {encoding: fileEncoding});
+    const content = await readFile(`${rootDir}/buildResources/helloWorld.md`, {
+      encoding: fileEncoding,
+    });
 
     // create the welcome note
     await writeFile(`${rootDir}/${welcomeNoteFilename}`, content, {encoding: fileEncoding});
@@ -37,15 +38,28 @@ export const getNotes: GetNotes = async () => {
     notes.push(welcomeNoteFilename);
   }
 
-  return Promise.all(notes.map(getNoteInfoFromFilename));
+  const noteInfos = await Promise.all(notes.map(getNoteInfoFromFilename));
+  // console.info('noteInfos', noteInfos);
+  return noteInfos;
 };
 
-export const getNoteInfoFromFilename = async (filename: string): Promise<NoteInfo> => {
+export const getNoteInfoFromFilename = async (filename: string): Promise<NoteFile> => {
   const fileStats = await stat(`${getRootDir()}/${filename}`);
+  const fileContent = await readFile(`${getRootDir()}/${filename}`, {encoding: fileEncoding});
+
+  if (!fileStats.isFile()) {
+    throw new Error(`File ${filename} is not a file`);
+  }
 
   return {
-    title: filename.replace(/\.md$/, ''),
-    lastEditTime: fileStats.mtimeMs,
+    path: `${getRootDir()}/${filename}`,
+    basename: basename(filename),
+    mtime: fileStats.mtimeMs,
+    content: fileContent,
+    metadata: {
+      title: filename.replace(/\.md$/, ''),
+      path: basename(filename),
+    },
   };
 };
 
@@ -59,45 +73,30 @@ export const writeNote: WriteNote = async (filename, content) => {
   const rootDir = getRootDir();
 
   console.info(`Writing note ${filename} in ${rootDir}`);
-  return writeFile(`${rootDir}/${filename}.md`, content, {encoding: fileEncoding});
+  writeFile(`${rootDir}/${filename}.md`, content, {encoding: fileEncoding});
+
+  return getNoteInfoFromFilename(`${filename}.md`);
 };
 
-export const createNote: CreateNote = async () => {
+export const createNote: CreateNote = async filename => {
   const rootDir = getRootDir();
 
   await ensureDir(rootDir);
 
-  const {filePath, canceled} = await dialog.showSaveDialog({
-    title: 'New note',
-    defaultPath: `${rootDir}/Untitled.md`,
-    buttonLabel: 'Create',
-    properties: ['showOverwriteConfirmation'],
-    showsTagField: false,
-    filters: [{name: 'Markdown', extensions: ['md']}],
-  });
-
-  if (canceled || !filePath) {
-    console.info('Note creation canceled');
-    return false;
+  const filePath = `${rootDir}/${filename}.md`;
+  // check if the file already exists
+  if (
+    await stat(filePath)
+      .then(() => true)
+      .catch(() => false)
+  ) {
+    console.info(`Note ${filename} already exists`);
+    return getNoteInfoFromFilename(`${filename}.md`);
   }
 
-  const {name: filename, dir: parentDir} = path.parse(filePath);
+  await writeFile(filePath, `# ${filename}\n\n`, {encoding: fileEncoding});
 
-  if (parentDir !== rootDir) {
-    await dialog.showMessageBox({
-      type: 'error',
-      title: 'Creation failed',
-      message: `All notes must be saved under ${rootDir}.
-      Avoid using other directories!`,
-    });
-
-    return false;
-  }
-
-  console.info(`Creating note: ${filePath}`);
-  await writeFile(filePath, '');
-
-  return filename;
+  return getNoteInfoFromFilename(`${filename}.md`);
 };
 
 export const deleteNote: DeleteNote = async filename => {
@@ -122,3 +121,51 @@ export const deleteNote: DeleteNote = async filename => {
   return true;
 };
 
+export const showFileItemContextMenu = async (file: NoteFile) => {
+  console.log('showFileItemContextMenu', file);
+  const menu = new Menu();
+
+  // rename selected note
+  menu.append(
+    new MenuItem({
+      label: 'Rename',
+      click: async () => {
+        console.info('rename', file);
+      },
+    }),
+  );
+  // delete selected note
+  menu.append(
+    new MenuItem({
+      label: 'Delete',
+      click: async () => {
+        console.info('delete', file);
+      },
+    }),
+  );
+};
+
+export const setVaultDirectory = async (directory: string) => {
+  console.info('Setting vault directory to: ', directory);
+};
+
+export const getVaultDirectory = async () => {
+  console.info('Getting vault directory');
+  return getRootDir();
+};
+
+export const selectDirectory = async () => {
+  console.info('Getting vault directory');
+  const result = await dialog.showOpenDialog({
+    title: 'Select vault directory',
+    properties: ['openDirectory', 'createDirectory'],
+  });
+
+  if (result.canceled) {
+    console.info('No directory selected');
+    return null;
+  } else {
+    console.info('Selected directory:', result.filePaths[0]);
+    return result.filePaths[0];
+  }
+};

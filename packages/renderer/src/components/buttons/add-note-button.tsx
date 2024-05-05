@@ -1,14 +1,18 @@
 import React from 'react';
-import {useSetAtom} from 'jotai';
+
 import {Button, ButtonProps} from '/@/components';
-import {createEmptyNoteAtom} from '/@/store';
+
 import {LuFileSignature} from 'react-icons/lu';
 
-export const AddNoteButton = ({...props}: ButtonProps) => {
-  const createNote = useSetAtom(createEmptyNoteAtom);
+export type AddNoteButtonProps = {
+  isOpen: boolean;
+  setIsNewNoteOpen: (isOpen: boolean) => void;
+} & ButtonProps;
+
+export const AddNoteButton = ({isOpen, setIsNewNoteOpen, ...props}: AddNoteButtonProps) => {
 
   const handleCreation = async () => {
-    await createNote();
+    setIsNewNoteOpen(true);
   };
 
   return (

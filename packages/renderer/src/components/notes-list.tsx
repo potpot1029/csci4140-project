@@ -2,9 +2,7 @@ import React, {ComponentProps} from 'react';
 import {useNotesList} from '/@/hooks/useNotesList';
 import lodash from 'lodash';
 const {isEmpty} = lodash;
-import {notesMock} from '/@/store/mocks';
 import {NoteEntry} from './note-entry';
-import { twMerge } from 'tailwind-merge';
 
 export type NotesListProps = {
   onSelect: () => void;
@@ -17,25 +15,24 @@ export const NotesList = ({onSelect, className, ...props}: NotesListProps) => {
 
   if (isEmpty(notes)) {
     return (
-      <ul className={twMerge('text-center pt-4', className)}>
-        <span>No Notes Found!</span>
-      </ul>
+      <div>
+          <span>No Notes Found!</span>
+      </div>
     );
   }
 
   return (
-    <ul
-      className={className}
-      {...props}
-    >
-      {notes.map((note, index) => (
-        <NoteEntry
-          key={note.title}
-          isActive={index === selectedNoteIndex}
-          onClick={handleNoteSelect(index)}
-          {...note}
-        />
-      ))}
-    </ul>
+    <div>
+        {notes.map((note, index) => (
+          <NoteEntry
+            key={note.basename}
+            file={note}
+            isActive={index === selectedNoteIndex}
+            onClick={handleNoteSelect(index)}
+            className='mb-2'
+            {...note}
+          />
+        ))}
+    </div>
   );
 };

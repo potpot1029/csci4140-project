@@ -23,6 +23,6 @@
     "src/**/*.tsx",
     "types/**/*.d.ts",
     "../../types/**/*.d.ts"
-  ],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts"]
+, "src/components/chatbot/llm/vectorDB-manager.ts", "src/components/chatbot/langchain-processor.ts"  ],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts", "pouchdb-8.0.1.min.js"]
 }

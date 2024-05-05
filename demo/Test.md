@@ -1,3 +1,0 @@
-Testing
-
-# Heading 1

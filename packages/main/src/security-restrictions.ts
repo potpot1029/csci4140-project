@@ -30,7 +30,7 @@ const ALLOWED_ORIGINS_AND_PERMISSIONS = new Map<string, Set<Permission>>(
  *   href="https://github.com/"
  * >
  */
-const ALLOWED_EXTERNAL_ORIGINS = new Set<`https://${string}`>(['https://github.com']);
+// const ALLOWED_EXTERNAL_ORIGINS = new Set<`https://${string}`>(['https://github.com']);
 
 app.on('web-contents-created', (_, contents) => {
   /**
@@ -84,16 +84,16 @@ app.on('web-contents-created', (_, contents) => {
    * @see https://www.electronjs.org/docs/latest/tutorial/security#15-do-not-use-openexternal-with-untrusted-content
    */
   contents.setWindowOpenHandler(({url}) => {
-    const {origin} = new URL(url);
+    // const {origin} = new URL(url);
 
     // shell.openExternal(url)
-    if (ALLOWED_EXTERNAL_ORIGINS.has(origin as `https://${string}`)) {
+    // if (ALLOWED_EXTERNAL_ORIGINS.has(origin as `https://${string}`)) {
       // Open url in default browser.
       console.log(`Opening external URL: ${url}`)
       shell.openExternal(url).catch(console.error);
-    } else if (import.meta.env.DEV) {
-      console.warn(`Blocked the opening of a disallowed origin: ${origin}`);
-    }
+    // } else if (import.meta.env.DEV) {
+      // console.warn(`Blocked the opening of a disallowed origin: ${origin}`);
+    // }
 
     return {action: 'deny'};
   });

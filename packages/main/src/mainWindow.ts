@@ -7,6 +7,12 @@ async function createWindow() {
   const browserWindow = new BrowserWindow({
     show: false, // Use the 'ready-to-show' event to show the instantiated BrowserWindow.
     title: app.name,
+    frame: false,
+    autoHideMenuBar: true,
+    width: 1000,
+    height: 670,
+    titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 10, y: 10 },
     vibrancy: 'under-window',
     visualEffectState: 'active',
     webPreferences: {

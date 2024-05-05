@@ -24,7 +24,7 @@ export const Editor: React.FC<Props> = props => {
 
   return (
     <div
-      className="flex-[0_0_50%] h-full"
+      className="flex-[0_0_50%] z-0 h-full"
       ref={refContainer}
     ></div>
   );
