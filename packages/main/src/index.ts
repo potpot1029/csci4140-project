@@ -1,8 +1,8 @@
-import {app, ipcMain} from 'electron';
+import {Menu, MenuItem, app, ipcMain} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
-import {createNote, deleteNote, getNotes, getVaultDirectory, readNote, selectDirectory, showFileItemContextMenu, writeNote} from './lib';
-import type {CreateNote, DeleteNote, GetNotes, GetVaultDirectory, ReadNote, SelectDirectory, ShowFileItemContextMenu, WriteNote} from '@shared/types';
+import {createNote, deleteNote, getNotes, getVaultDirectory, readNote, renameNote, selectDirectory, writeNote} from './lib';
+import type {CreateNote, DeleteNote, GetNotes, GetVaultDirectory, ReadNote, RenameNote, SelectDirectory, WriteNote} from '@shared/types';
 import {platform} from 'node:process';
 import updater from 'electron-updater';
 
@@ -91,6 +91,42 @@ ipcMain.handle('readNote', (_, ...args: Parameters<ReadNote>) => readNote(...arg
 ipcMain.handle('writeNote', (_, ...args: Parameters<WriteNote>) => writeNote(...args));
 ipcMain.handle('createNote', (_, ...args: Parameters<CreateNote>) => createNote(...args));
 ipcMain.handle('deleteNote', (_, ...args: Parameters<DeleteNote>) => deleteNote(...args));
-ipcMain.handle('showFileItemContextMenu', (_, ...args: Parameters<ShowFileItemContextMenu>) => showFileItemContextMenu(...args));
 ipcMain.handle('selectDirectory', (_, ...args: Parameters<SelectDirectory>) => selectDirectory(...args));
 ipcMain.handle('getVaultDirectory', (_, ...args: Parameters<GetVaultDirectory>) => getVaultDirectory(...args));
+ipcMain.handle('renameNote', (_, ...args: Parameters<RenameNote>) => renameNote(...args));
+
+ipcMain.handle('show-note-item-context-menu', (event, file: string) => {
+  console.log('showNoteItemContextMenu', file);
+  const menu = new Menu();
+
+  // delete selected note
+  menu.append(
+    new MenuItem({
+      label: 'Delete',
+      click: async () => {
+        console.info('delete-note', file);
+        event.sender.send('delete-note', file);
+      },
+    }),
+  );
+
+  menu.popup();
+});
+
+ipcMain.handle('show-ai-context-menu', (event, selectedText) => {
+  console.log('showAIContextMenu');
+  const menu = new Menu();
+
+  // summarize selected text
+  menu.append(
+    new MenuItem({
+      label: 'Summarize',
+      click: async () => {
+        console.info('summarize: ', selectedText);
+        event.sender.send('summarize-text', selectedText);
+      },
+    }),
+  );
+
+  menu.popup();
+});

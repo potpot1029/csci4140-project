@@ -18,3 +18,8 @@ body {
 }
 
 .cm-line { z-index: 0 }
+
+/* hiding scrollbar */
+::-webkit-scrollbar {
+  @apply hidden;
+}

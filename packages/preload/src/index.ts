@@ -13,13 +13,15 @@ import type {
   GetNotes,
   GetVaultDirectory,
   ReadNote,
+  RenameNote,
   SelectDirectory,
   SetVaultDirectory,
   ShowFileItemContextMenu,
   UpdateChatHistory,
   WriteNote,
 } from '@shared/types';
-import {contextBridge, ipcRenderer} from 'electron';
+import type {IpcRendererEvent} from 'electron';
+import { contextBridge, ipcRenderer} from 'electron';
 
 try {
   contextBridge.exposeInMainWorld('context', {
@@ -29,6 +31,7 @@ try {
     writeNote: (...args: Parameters<WriteNote>) => ipcRenderer.invoke('writeNote', ...args),
     createNote: (...args: Parameters<CreateNote>) => ipcRenderer.invoke('createNote', ...args),
     deleteNote: (...args: Parameters<DeleteNote>) => ipcRenderer.invoke('deleteNote', ...args),
+    renameNote: (...args: Parameters<RenameNote>) => ipcRenderer.invoke('renameNote', ...args),
   });
   contextBridge.exposeInMainWorld('contextMenu', {
     showFileItemContextMenu: (...args: Parameters<ShowFileItemContextMenu>) =>
@@ -47,11 +50,22 @@ try {
   });
 
   contextBridge.exposeInMainWorld('files', {
-    selectDirectory: (...args: Parameters<SelectDirectory>) => ipcRenderer.invoke('selectDirectory', ...args),
+    selectDirectory: (...args: Parameters<SelectDirectory>) =>
+      ipcRenderer.invoke('selectDirectory', ...args),
   });
 
+  contextBridge.exposeInMainWorld('ipcRenderer', {
+    invoke: (channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args),
+    receive: (channel: string, callback: (...args: unknown[]) => void) => {
+      // this creates a constant copy of the callback, thus ensuring that the removed listener is the same as the one added
+      const subscription = (event: IpcRendererEvent, ...args: unknown[]) => callback(...args);
 
-
+      ipcRenderer.on(channel, subscription);
+      return () => {
+        ipcRenderer.removeListener(channel, subscription);
+      };
+    },
+  });
 } catch (error) {
   console.error(error);
 }

@@ -1,5 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai';
-import React, {ComponentProps, useState, useCallback} from 'react';
+import React, {ComponentProps, useState, useCallback, useEffect} from 'react';
 import {saveNoteAtom, selectedNoteAtom} from '/@/store';
 import {Editor, Preview} from '/@/components';
 import lodash from 'lodash';
@@ -13,6 +13,13 @@ export type NoteProps = {
 export const Note = ({showNotes, ...props}: NoteProps) => {
   const selectedNote = useAtomValue(selectedNoteAtom);
   const saveNote = useSetAtom(saveNoteAtom);
+
+
+
+  useEffect(() => {
+    if (!selectedNote) return;
+    console.log('Selected Note:', selectedNote.metadata.title);
+  }, [selectedNote]);
 
   if (!selectedNote) return null;
 
@@ -28,6 +35,8 @@ export const Note = ({showNotes, ...props}: NoteProps) => {
       trailing: true,
     },
   );
+
+
 
   return (
     <div className="flex flex-row">

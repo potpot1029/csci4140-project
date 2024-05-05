@@ -10,6 +10,12 @@ import type {
 declare global {
   interface Window {
     // electron: ElectronAPI
+    ipcRenderer: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      invoke: (channel:string, ...args: any[]) => Promise<any>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      receive: (channel:string, callback: ReceiveCallback) => () => void;
+    };
     context: {
       locale: string;
       getNotes: GetNotes;

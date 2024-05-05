@@ -94,6 +94,24 @@ export const createEmptyNoteAtom = atom(null, async (get, set, title: string) =>
   set(selectedNoteIndexAtom, 0);
 });
 
+// Delete the given note
+export const deleteNoteAtom = atom(null, async (get, set, title) => {
+  const notes = get(notesAtom);
+  const selectedNote = get(selectedNoteAtom);
+  if (!notes) return;
+
+  await window.context.deleteNote(title);
+
+  set(
+    notesAtom,
+    notes.filter(note => note.metadata.title !== title),
+  );
+
+  if (selectedNote?.metadata.title === title) {
+    set(selectedNoteIndexAtom, null);
+  }
+});
+
 export const chatHistoryAtom = atom<ChatMessage[]>([]);
 
 export const addChatMessageAtom = atom(null, (get, set, message: ChatMessage) => {

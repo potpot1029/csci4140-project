@@ -1,7 +1,7 @@
 import {appDirectoryName, fileEncoding, welcomeNoteFilename} from '@shared/constants';
 import type {NoteFile} from '@shared/models';
 import type {CreateNote, DeleteNote, GetNotes, ReadNote, WriteNote} from '@shared/types';
-import {dialog, Menu, MenuItem} from 'electron';
+import {dialog} from 'electron';
 import fs_extra from 'fs-extra';
 const {ensureDir, readFile, readdir, remove, stat, writeFile} = fs_extra;
 import lodash from 'lodash';
@@ -78,6 +78,15 @@ export const writeNote: WriteNote = async (filename, content) => {
   return getNoteInfoFromFilename(`${filename}.md`);
 };
 
+export const renameNote = async (oldFilename: string, newFilename: string) => {
+  const rootDir = getRootDir();
+
+  console.info(`Renaming note ${oldFilename} to ${newFilename}`);
+  await fs_extra.rename(`${rootDir}/${oldFilename}.md`, `${rootDir}/${newFilename}.md`);
+
+  return getNoteInfoFromFilename(`${newFilename}.md`);
+}
+
 export const createNote: CreateNote = async filename => {
   const rootDir = getRootDir();
 
@@ -119,30 +128,6 @@ export const deleteNote: DeleteNote = async filename => {
   console.info(`Deleting note: ${filename}`);
   await remove(`${rootDir}/${filename}.md`);
   return true;
-};
-
-export const showFileItemContextMenu = async (file: NoteFile) => {
-  console.log('showFileItemContextMenu', file);
-  const menu = new Menu();
-
-  // rename selected note
-  menu.append(
-    new MenuItem({
-      label: 'Rename',
-      click: async () => {
-        console.info('rename', file);
-      },
-    }),
-  );
-  // delete selected note
-  menu.append(
-    new MenuItem({
-      label: 'Delete',
-      click: async () => {
-        console.info('delete', file);
-      },
-    }),
-  );
 };
 
 export const setVaultDirectory = async (directory: string) => {

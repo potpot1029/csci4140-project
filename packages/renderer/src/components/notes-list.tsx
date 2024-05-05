@@ -1,4 +1,4 @@
-import React, {ComponentProps} from 'react';
+import React, {ComponentProps, useEffect} from 'react';
 import {useNotesList} from '/@/hooks/useNotesList';
 import lodash from 'lodash';
 const {isEmpty} = lodash;
@@ -10,6 +10,8 @@ export type NotesListProps = {
 
 export const NotesList = ({onSelect, className, ...props}: NotesListProps) => {
   const {notes, selectedNoteIndex, handleNoteSelect} = useNotesList({onSelect});
+
+  
 
   if (!notes) return null;
 

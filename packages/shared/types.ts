@@ -1,10 +1,11 @@
 import type { ChatMessage, NoteContent, NoteFile } from './models'
 
 export type GetNotes = () => Promise<NoteFile[]>
-export type ReadNote = (title: NoteFile['basename']) => Promise<NoteContent>
-export type WriteNote = (title: NoteFile['basename'], content: NoteContent) => Promise<NoteFile>
+export type ReadNote = (title: string) => Promise<NoteContent>
+export type WriteNote = (title: string, content: NoteContent) => Promise<NoteFile>
 export type CreateNote = (title: string) => Promise<NoteFile | false>
-export type DeleteNote = (title: NoteFile['basename']) => Promise<boolean>
+export type DeleteNote = (title: string) => Promise<boolean>
+export type RenameNote = (oldTitle: string, newTitle: string) => Promise<NoteFile | false>
 
 export type GetChatHistory = () => Promise<ChatMessage[]>
 export type UpdateChatHistory = (message: ChatMessage) => Promise<void>

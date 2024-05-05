@@ -1,17 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import {Preview} from '/@/components';
+import {Button, Preview} from '/@/components';
 import {ChatInput} from './chat-input';
-import {ChainType, ChatMessage} from '@shared/models';
+import {ChainType, ChatMessage, NoteFile} from '@shared/models';
 import {getAIAnswer} from './langchain-processor';
 import {cn} from '/@/utils';
 import {useChatHistory} from '/@/hooks/useChatHistory';
 import ChainManager from './llm/chain-manager';
 import {extractNoteTitles, getNoteByTitle} from './llm/utils';
 import {useAtomValue} from 'jotai';
-import {notesAtom} from '/@/store';
+import {notesAtom, selectedNoteIndexAtom} from '/@/store';
 import {BaseChatMemory} from 'langchain/memory';
 import VectorDBManager, {VectorStoreDocument} from './llm/vectorDB-manager';
 import EmbeddingManager from './llm/embedding-manager';
+
 
 export type ChatProps = {
   chainManager: ChainManager | null;
@@ -25,16 +26,25 @@ export const Chat = ({chainManager, dbVectorStores, embeddingsManager}: ChatProp
   const [userInput, setUserInput] = useState('');
   const [aiAnswer, setAiAnswer] = useState('');
   const {chatHistory, addChatMessage, clearChatHistory} = useChatHistory();
+  const selectedNoteIndex = useAtomValue(selectedNoteIndexAtom);
+  const [activeNote, setActiveNote] = useState<NoteFile | null>();
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [loadingResponse, setLoadingResponse] = useState(false);
   const [currentChain, setCurrentChain] = useState(langChainParams.chainType);
+  const [systemMessage, setSystemMessage] = useState('');
   const [, setChatMemory] = useState<BaseChatMemory | null>(
     chainManager!.memoryManager.getMemory(),
   );
 
+  const showMessage = (message: string) => {
+    setSystemMessage(message);
+    setTimeout(() => setSystemMessage(''), 2000);
+  };
+
   const handleClearMemory = () => {
     chainManager!.memoryManager.clearChatMemory();
     setChatMemory(chainManager!.memoryManager.getMemory());
+    showMessage('Memory cleared!');
   };
 
   const handleRefreshIndex = async () => {
@@ -90,7 +100,10 @@ export const Chat = ({chainManager, dbVectorStores, embeddingsManager}: ChatProp
       });
       return notes!.length;
     };
+    showMessage('Indexing notes...');
+    clearChatHistory();
     await indexVault();
+    showMessage('Indexing done!');
   };
 
   const handleSelectChain = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -98,13 +111,33 @@ export const Chat = ({chainManager, dbVectorStores, embeddingsManager}: ChatProp
     if (newChain == 'vault_qa_chain') {
       const activeMessage: ChatMessage = {
         sender: 'ai',
-        message: 'I have read your notes. Feel free to ask me anything about them\n\n',
+        message: 'I have read through your notes. Feel free to ask me anything about them!\n\n',
         isVisible: true,
       };
       addChatMessage(activeMessage);
+      handleRefreshIndex();
+    } else if (newChain == 'long_note_qa_chain') {
+      // get current active note
+      const activeNote = notes[selectedNoteIndex!];
+      if (!activeNote) {
+        showMessage('No active note!');
+        return;
+      }
+      setActiveNote(activeNote);
+      const activeMessage: ChatMessage = {
+        sender: 'ai',
+        message: `I have read through [[${activeNote.metadata.title}]]. Feel free to ask me anything about it!\n\n`,
+        isVisible: true,
+      };
+      addChatMessage(activeMessage);
+      if (activeNote.content) {
+        chainManager!.setChain(newChain, {noteFile: activeNote});
+        setCurrentChain(newChain);
+      }
     }
     chainManager!.setChain(newChain);
     setCurrentChain(newChain);
+    showMessage(`Switched to ${newChain}`);
   };
 
   const handleSubmitMessage = async () => {
@@ -153,16 +186,29 @@ export const Chat = ({chainManager, dbVectorStores, embeddingsManager}: ChatProp
     setLoadingResponse(false);
   };
 
+  const handleClearHistory = () => {
+    clearChatHistory();
+    showMessage('Chat history cleared!');
+  };
+
   useEffect(() => {
     // scroll to bottom
     const chat = document.querySelector('.chat');
     if (chat) chat.scrollTop = chat.scrollHeight;
-  }, [chatHistory]);
+  }, [aiAnswer]);
 
   return (
-    <div className="chat flex flex-col h-full w-full">
+    <div className="flex flex-col h-full w-full">
       <div className="text-center h-10 w-full text-zinc-300 font-bold">Ollama Llama3</div>
-      <div className="flex-grow">
+      <div
+        id="chat"
+        className="flex-grow"
+      >
+        {systemMessage !== '' ? (
+          <div className="w-full h-10 flex items-center justify-center text-zinc-300">
+            {systemMessage}
+          </div>
+        ) : null}
         {chatHistory.map(
           (message, index) =>
             message.isVisible && (
@@ -194,9 +240,9 @@ export const Chat = ({chainManager, dbVectorStores, embeddingsManager}: ChatProp
         ) : null}
       </div>
 
-      <div className="w-full">
+      <div className="w-full mb-2 flex flex-col">
         <select
-          className="bg-transparent"
+          className="bg-transparent text-zinc-300 border border-zinc-300 rounded-md p-1"
           value={currentChain}
           onChange={handleSelectChain}
         >
@@ -204,8 +250,26 @@ export const Chat = ({chainManager, dbVectorStores, embeddingsManager}: ChatProp
           <option value="long_note_qa_chain">Long Note QA</option>
           <option value="vault_qa_chain">Vault QA</option>
         </select>
-        <button onClick={clearChatHistory}>Clear Chat</button>
-        <button onClick={handleClearMemory}>Clear Memory</button>
+        <div className="w-full mt-2 flex flex-row">
+          <Button
+            className="p-1 text-zinc-300 border border-zinc-300"
+            onClick={handleClearHistory}
+          >
+            Clear Chat
+          </Button>
+          <Button
+            className="p-1 text-zinc-300 border border-zinc-300"
+            onClick={handleClearMemory}
+          >
+            Clear Memory
+          </Button>
+          <Button
+            className="p-1 text-zinc-300 border border-zinc-300"
+            onClick={handleRefreshIndex}
+          >
+            Refresh Index
+          </Button>
+        </div>
       </div>
 
       <ChatInput

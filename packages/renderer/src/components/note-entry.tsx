@@ -2,6 +2,7 @@ import React, {ComponentProps} from 'react';
 import {NoteFile} from '@shared/models';
 import {cn, formatDateFromMs} from '/@/utils';
 import {FaRegFileLines} from 'react-icons/fa6';
+import { ipcRenderer } from 'electron';
 
 export type NoteEntryProps = NoteFile & {
   file: NoteFile;
@@ -17,8 +18,8 @@ export const NoteEntry = ({
 
   const handleContextMenu = (event: React.MouseEvent) => {
     event.preventDefault();
-    // show context menu
-    window.contextMenu.showFileItemContextMenu(file);
+    window.ipcRenderer.invoke('show-note-item-context-menu', file.metadata.title);
+
   };
   return (
     <div
