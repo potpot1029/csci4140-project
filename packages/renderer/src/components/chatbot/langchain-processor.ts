@@ -1,7 +1,9 @@
 import type {ChatMessage} from '@shared/models';
 import type ChainManager from './llm/chain-manager';
 import {Ollama} from '@langchain/community/llms/ollama';
-import type { SetStateAction } from 'react';
+import type {SetStateAction} from 'react';
+import {OllamaEmbeddings} from 'langchain/embeddings/ollama';
+
 
 export const getAIAnswer = async (
   userMessage: ChatMessage,
@@ -32,7 +34,11 @@ export const getAIAnswer = async (
 };
 
 // don't need chain for simple AI
-export const simpleAIAnswer = async (selectedText: string, type: string, setAnswer: { (value: SetStateAction<string>): void; (arg0: string): void; }) => {
+export const simpleAIAnswer = async (
+  selectedText: string,
+  type: string,
+  setAnswer: {(value: SetStateAction<string>): void; (arg0: string): void},
+) => {
   console.log('getting simple AI answer:', selectedText);
 
   // llama3
@@ -61,7 +67,7 @@ export const simpleAIAnswer = async (selectedText: string, type: string, setAnsw
       ${selectedText}
       """
       
-      No need to answer other thing other than the simplified text. And do not include the triple quotes in the answer.`; 
+      No need to answer other thing other than the simplified text. And do not include the triple quotes in the answer.`;
       break;
     case 'Paraphrase':
       prompt = `Paraphrase the text in triple quotes. Use different words and sentence structure, but keep the same meaning. 
@@ -104,4 +110,24 @@ export const simpleAIAnswer = async (selectedText: string, type: string, setAnsw
     setAnswer(chunks.join(''));
   }
   return true;
+};
+
+export const testModelAndEmbedding = async () => {
+  try {
+    console.log('Testing model');
+    const model = new Ollama({
+      model: 'llama3',
+    });
+    await model.generate(['Hello, how are you?']);
+
+    console.log('Testing embedding');
+    const embedding = new OllamaEmbeddings({
+      model: 'nomic-embed-text',
+    });
+    await embedding.embedQuery('Hello, how are you?');
+    return true;
+  } catch (error) {
+    console.error('Error testing model.', error);
+    throw error;
+  }
 };

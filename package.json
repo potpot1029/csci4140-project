@@ -25,7 +25,6 @@
     "lint": "eslint . --ext js,mjs,cjs,ts,mts,cts,vue",
     "typecheck:main": "tsc --noEmit -p packages/main/tsconfig.json",
     "typecheck:preload": "tsc --noEmit -p packages/preload/tsconfig.json",
-    "typecheck": "npm run typecheck:main && npm run typecheck:preload && npm run typecheck:renderer",
     "postinstall": "cross-env ELECTRON_RUN_AS_NODE=1 electron scripts/update-electron-vendors.js",
     "format": "npx prettier --write \"**/*.{js,mjs,cjs,ts,mts,cts,vue,json}\""
   },
@@ -115,6 +114,7 @@
     "llamaindex": "^0.3.4",
     "lodash": "^4.17.21",
     "neo4j-driver": "^5.20.0",
+    "ollama": "^0.5.0",
     "postcss": "^8.4.38",
     "pouchdb-browser": "^8.0.1",
     "process": "^0.11.10",

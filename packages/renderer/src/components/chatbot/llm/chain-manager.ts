@@ -91,6 +91,7 @@ export default class ChainManager {
     console.info('Setting chain:', chainType);
     if (!this.chatModelManager.checkChatModel(this.chatModelManager.getChatModel())) {
       console.error('[setChain]: No chat model found');
+      throw new Error('No chat model found');
       return;
     }
 
@@ -371,6 +372,14 @@ export default class ChainManager {
       }
     } catch (error) {
       console.error('Error running chain:', error);
+      const errorData = error?.response?.data?.error || error;
+      const errorCode = error?.response?.status || error?.code || error;
+      if (errorCode === "model_not_found") {
+        throw new Error('The llama3 model does not exist. Please ensure you have installed the model.');
+      }
+      else {
+        throw new Error('Error running chain: ' + errorData);
+      }
     } finally {
       if (fullAIResponse) {
         await memory.saveContext({input: userMessage}, {output: fullAIResponse});

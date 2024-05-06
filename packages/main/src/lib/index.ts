@@ -9,13 +9,12 @@ const {isEmpty} = lodash;
 import {basename} from 'path';
 
 export const getRootDir = () => {
-  return `${appDirectoryName}`;
+    return `${appDirectoryName}`;
 };
 
 export const getNotes: GetNotes = async () => {
   const rootDir = getRootDir();
 
-  await ensureDir(rootDir);
 
   const notesFileNames = await readdir(rootDir, {
     encoding: fileEncoding,
@@ -28,7 +27,7 @@ export const getNotes: GetNotes = async () => {
   if (isEmpty(notes)) {
     console.info('No notes found, creating a welcome note');
 
-    const content = await readFile(`${rootDir}/buildResources/helloWorld.md`, {
+    const content = await readFile(process.cwd() + `/buildResources/helloWorld.md`, {
       encoding: fileEncoding,
     });
 
@@ -136,7 +135,13 @@ export const setVaultDirectory = async (directory: string) => {
 
 export const getVaultDirectory = async () => {
   console.info('Getting vault directory');
-  return getRootDir();
+  const root = getRootDir();
+  console.info('Vault directory:', root);
+  if (fs_extra.existsSync(root)) {
+    return root;
+  }
+  return null;
+
 };
 
 export const selectDirectory = async () => {

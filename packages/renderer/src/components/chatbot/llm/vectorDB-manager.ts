@@ -128,7 +128,10 @@ class VectorDBManager {
     if (!db) throw new Error('Database not initialized');
 
     const embeddingModel = EmbeddingManager.getModelName(embeddingsAPI);
-    if (!embeddingModel) console.error('Embedding model could not be determined');
+    if (!embeddingModel) {
+      console.error('Embedding model could not be determined');
+      throw new Error('Embedding model could not be determined');
+    }
 
     // Markdown splitter: https://js.langchain.com/docs/modules/data_connection/document_transformers/code_splitter#markdown
     const textSplitter = RecursiveCharacterTextSplitter.fromLanguage('markdown', {

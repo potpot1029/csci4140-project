@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {
-  MainPage,
-} from '/@/components';
+import {MainPage, testModelAndEmbedding} from '/@/components';
 import {InitializationPage} from './components/settings/init-page';
 import {defaultSettings} from '@shared/constants';
 import {ChainOptions, ChainType, LangChainParams, NoteFile} from '@shared/models';
 import VectorDBManager, {VectorStoreDocument} from './components/chatbot/llm/vectorDB-manager';
 import EmbeddingManager from './components/chatbot/llm/embedding-manager';
 import ChainManager from './components/chatbot/llm/chain-manager';
+import {set} from 'lodash';
+import test from 'node:test';
 
 const App = () => {
   const [configured, setConfigured] = useState<boolean>(false);
@@ -17,6 +17,7 @@ const App = () => {
   const [currentEmbeddingsManager, setCurrentEmbeddingsManager] = useState<EmbeddingManager | null>(
     null,
   );
+  const [error, setError] = useState<string | null>(null);
 
   const getChainmanagerParams = () => {
     return {
@@ -33,21 +34,33 @@ const App = () => {
     } as LangChainParams;
   };
 
-  const load = async (notes: NoteFile[]): Promise<void> => {
+  const load = async (notes: NoteFile[]): Promise<boolean> => {
     console.info('Loading vault...');
-    const langChainParams = getChainmanagerParams();
-    let dbVectorStores = new PouchDB<VectorStoreDocument>('two_brain_vector_stores');
-    let chainManager = new ChainManager(langChainParams, () => dbVectorStores);
-    let embeddingsManager = EmbeddingManager.getInstance(langChainParams);
-
-    console.info('Chain manager:', chainManager);
     // index vault
     try {
-      const indexVault = async (overwrite?: boolean): Promise<number> => {
+      const langChainParams = getChainmanagerParams();
+      let dbVectorStores = new PouchDB<VectorStoreDocument>('two_brain_vector_stores');
+      let chainManager = new ChainManager(langChainParams, () => dbVectorStores);
+      let embeddingsManager = EmbeddingManager.getInstance(langChainParams);
+
+      console.info('Chain manager:', chainManager);
+
+      // test chain
+      try {
+        await testModelAndEmbedding();
+      }
+      catch (error) {
+        console.error('Error testing model and embedding:', error);
+        setError('Error testing model and embedding. Please make sure you have install them:' + error);
+        return false;
+      }
+
+      const indexVault = async (overwrite?: boolean): Promise<boolean> => {
         const embeddingInstance = embeddingsManager!.getEmbeddingsAPI();
         if (!embeddingInstance) {
           console.error('Embeddings API not found');
-          return 0;
+          setError("Embeddings not found. Please make sure you have installed 'nomic-embed-text'");
+          return false;
         }
 
         // check embedding model
@@ -61,13 +74,14 @@ const App = () => {
         //   console.info('Embedding model changed, re-indexing vault');
         //   overwrite = true;
 
-          try {
-            await dbVectorStores.destroy();
-            dbVectorStores = new PouchDB<VectorStoreDocument>('two_brain_vector_stores');
-            console.log('rebuilding vector store');
-          } catch (error) {
-            console.error('Error destroying vector store:', error);
-          }
+        try {
+          await dbVectorStores.destroy();
+          dbVectorStores = new PouchDB<VectorStoreDocument>('two_brain_vector_stores');
+          console.log('rebuilding vector store');
+        } catch (error) {
+          console.error('Error destroying vector store:', error);
+          setError('Error destroying vector store. Please try again: ' + error);
+        }
         // }
 
         // just index all notes
@@ -77,12 +91,14 @@ const App = () => {
         const totalFiles = notes.length;
         if (totalFiles === 0) {
           console.info('No files to index');
-          return 0;
+          return false;
         }
 
         let indexedCnt = 0;
         console.info('Indexing files...');
+        const errors: string[] = [];
         const loadPromises = notes.map(async (file, idx) => {
+          console.log('Indexing file:', file.basename)
           try {
             const result = await VectorDBManager.indexFile(
               dbVectorStores!,
@@ -95,30 +111,52 @@ const App = () => {
             return result;
           } catch (error) {
             console.error(`Error indexing file ${file.basename}:`, error);
+            errors.push(`Error indexing file ${file.basename}: ${error}`);
           }
         });
         await Promise.all(loadPromises);
-        return notes.length;
+
+        if (errors.length > 0) {
+          console.error('Errors indexing files:', errors);
+          setError('Errors indexing files: ' + errors.join(', '));
+          return false;
+        }
+        return true;
       };
-      await indexVault();
+      const response = await indexVault();
 
       setCurrentDbVectorStores(dbVectorStores);
       setCurrentChainManager(chainManager);
       setCurrentEmbeddingsManager(embeddingsManager);
+      return response;
     } catch (error) {
       console.error('Error indexing vault:', error);
+      setError('Error indexing vault. Please try again: ' + error);
+      return false;
     }
   };
 
   useEffect(() => {
     const fetchSettings = async () => {
-      const notes = await window.context.getNotes();
+      setError('Initializing...')
       const vaultDirectory = await window.electron.getVaultDirectory();
       console.info('vaultDirectory', vaultDirectory);
-      if (vaultDirectory) {
-        setConfigured(true);
-        await load(notes);
+      if (!vaultDirectory) {
+        setError('Vault directory not set. Please configure your directory and restart the app.');
+      } else {
         console.info('Vault directory already set');
+        const notes = await window.context.getNotes();
+        if (!notes) {
+          setError('Error loading notes. Please try again.');
+          return;
+        }
+
+        const response = await load(notes);
+        if (!response) {
+          return;
+        }
+
+        setConfigured(true);
       }
     };
     fetchSettings();
@@ -127,7 +165,7 @@ const App = () => {
   return (
     <>
       {!configured ? (
-        <InitializationPage />
+        <InitializationPage error={error} />
       ) : (
         <MainPage
           dbVectorStores={currentDbVectorStores}
