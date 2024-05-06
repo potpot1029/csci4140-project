@@ -1,8 +1,26 @@
 import {Menu, MenuItem, app, ipcMain} from 'electron';
 import './security-restrictions';
 import {restoreOrCreateWindow} from '/@/mainWindow';
-import {createNote, deleteNote, getNotes, getVaultDirectory, readNote, renameNote, selectDirectory, writeNote} from './lib';
-import type {CreateNote, DeleteNote, GetNotes, GetVaultDirectory, ReadNote, RenameNote, SelectDirectory, WriteNote} from '@shared/types';
+import {
+  createNote,
+  deleteNote,
+  getNotes,
+  getVaultDirectory,
+  readNote,
+  renameNote,
+  selectDirectory,
+  writeNote,
+} from './lib';
+import type {
+  CreateNote,
+  DeleteNote,
+  GetNotes,
+  GetVaultDirectory,
+  ReadNote,
+  RenameNote,
+  SelectDirectory,
+  WriteNote,
+} from '@shared/types';
 import {platform} from 'node:process';
 import updater from 'electron-updater';
 
@@ -42,7 +60,6 @@ app.on('activate', restoreOrCreateWindow);
 app
   .whenReady()
   .then(() => {
-
     restoreOrCreateWindow();
   })
   .catch(e => console.error('Failed create window:', e));
@@ -85,14 +102,17 @@ if (import.meta.env.PROD) {
     .catch(e => console.error('Failed check and install updates:', e));
 }
 
-
 ipcMain.handle('getNotes', (_, ...args: Parameters<GetNotes>) => getNotes(...args));
 ipcMain.handle('readNote', (_, ...args: Parameters<ReadNote>) => readNote(...args));
 ipcMain.handle('writeNote', (_, ...args: Parameters<WriteNote>) => writeNote(...args));
 ipcMain.handle('createNote', (_, ...args: Parameters<CreateNote>) => createNote(...args));
 ipcMain.handle('deleteNote', (_, ...args: Parameters<DeleteNote>) => deleteNote(...args));
-ipcMain.handle('selectDirectory', (_, ...args: Parameters<SelectDirectory>) => selectDirectory(...args));
-ipcMain.handle('getVaultDirectory', (_, ...args: Parameters<GetVaultDirectory>) => getVaultDirectory(...args));
+ipcMain.handle('selectDirectory', (_, ...args: Parameters<SelectDirectory>) =>
+  selectDirectory(...args),
+);
+ipcMain.handle('getVaultDirectory', (_, ...args: Parameters<GetVaultDirectory>) =>
+  getVaultDirectory(...args),
+);
 ipcMain.handle('renameNote', (_, ...args: Parameters<RenameNote>) => renameNote(...args));
 
 ipcMain.handle('show-note-item-context-menu', (event, file: string) => {
@@ -123,10 +143,45 @@ ipcMain.handle('show-ai-context-menu', (event, selectedText) => {
       label: 'Summarize',
       click: async () => {
         console.info('summarize: ', selectedText);
-        event.sender.send('summarize-text', selectedText);
+        event.sender.send('ai-text', selectedText, 'Summarize');
       },
     }),
   );
-
+  menu.append(
+    new MenuItem({
+      label: 'Simplify',
+      click: async () => {
+        console.info('simplify: ', selectedText);
+        event.sender.send('ai-text', selectedText, 'Simplify');
+      },
+    }),
+  );
+  menu.append(
+    new MenuItem({
+      label: 'Paraphrase',
+      click: async () => {
+        console.info('paraphrase: ', selectedText);
+        event.sender.send('ai-text', selectedText, 'Paraphrase');
+      },
+    }),
+  );
+  menu.append(
+    new MenuItem({
+      label: 'Expand',
+      click: async () => {
+        console.info('paraphrase: ', selectedText);
+        event.sender.send('ai-text', selectedText, 'Expand');
+      },
+    }),
+  );
+  menu.append(
+    new MenuItem({
+      label: 'Fix Grammar',
+      click: async () => {
+        console.info('fix grammar: ', selectedText);
+        event.sender.send('ai-text', selectedText, 'Fix Grammar');
+      },
+    }),
+  );
   menu.popup();
 });

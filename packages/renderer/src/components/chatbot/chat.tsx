@@ -131,6 +131,7 @@ export const Chat = ({chainManager, dbVectorStores, embeddingsManager}: ChatProp
       };
       addChatMessage(activeMessage);
       if (activeNote.content) {
+        console.log('setting active note:', activeNote);
         chainManager!.setChain(newChain, {noteFile: activeNote});
         setCurrentChain(newChain);
       }

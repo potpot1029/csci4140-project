@@ -35,6 +35,8 @@ npm i
 npm run watch
 ```
 
+*Notice that you may need to reindex the vault by clicking the button in the Chat interface to ensure the indices of all the notes are at the latest version*
+
 ## References
 Many thanks to the following resources:
 - [CodeWithGionatha-Labs/NoteMark](https://github.com/CodeWithGionatha-Labs/NoteMark)

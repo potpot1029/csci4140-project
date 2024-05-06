@@ -87,6 +87,7 @@ export default class ChainManager {
   }
 
   async setChain(chainType: ChainType, options: ChainOptions = {}): Promise<void> {
+    console.log('Setting chain:', options);
     console.info('Setting chain:', chainType);
     if (!this.chatModelManager.checkChatModel(this.chatModelManager.getChatModel())) {
       console.error('[setChain]: No chat model found');

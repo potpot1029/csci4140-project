@@ -1,6 +1,7 @@
 import type {ChatMessage} from '@shared/models';
 import type ChainManager from './llm/chain-manager';
 import {Ollama} from '@langchain/community/llms/ollama';
+import type { SetStateAction } from 'react';
 
 export const getAIAnswer = async (
   userMessage: ChatMessage,
@@ -31,7 +32,7 @@ export const getAIAnswer = async (
 };
 
 // don't need chain for simple AI
-export const simpleAIAnswer = async (selectedText, type, setAnswer) => {
+export const simpleAIAnswer = async (selectedText: string, type: string, setAnswer: { (value: SetStateAction<string>): void; (arg0: string): void; }) => {
   console.log('getting simple AI answer:', selectedText);
 
   // llama3
@@ -39,23 +40,68 @@ export const simpleAIAnswer = async (selectedText, type, setAnswer) => {
     model: 'llama3',
   });
 
-  if (type == 'summarize') {
-    const stream = await model.stream(`Summarize the text in triple quotes.
-    Keep it concise, but make sure to include all the important details. Use the same language and tone as the original text. 
+  let prompt = '';
 
-    """
-    ${selectedText}
-    """
-    
-    No need to answer other thing other than the summary. And do not include the triple quotes in the answer.`);
-    const chunks = [];
-    for await (const chunk of stream) {
-      chunks.push(chunk);
-      setAnswer(chunks.join(''));
-    }
-    return chunks.join('');
-  } else if (type == 'simplify') {
-    return 'This is a simplified version of the selected text.';
+  switch (type) {
+    case 'Summarize':
+      prompt = `Summarize the text in triple quotes.
+      Keep it concise, but make sure to include all the important details. Use the same language and tone as the original text. 
+
+      """
+      ${selectedText}
+      """
+      
+      No need to answer other thing other than the summary. And do not include the triple quotes in the answer.`;
+      break;
+    case 'Simplify':
+      prompt = `Simplify and condense the text in triple quotes. Keep the meaning the same, but make it easier to understand. 
+      Use the same language and tone as the original text.
+      
+      """
+      ${selectedText}
+      """
+      
+      No need to answer other thing other than the simplified text. And do not include the triple quotes in the answer.`; 
+      break;
+    case 'Paraphrase':
+      prompt = `Paraphrase the text in triple quotes. Use different words and sentence structure, but keep the same meaning. 
+      Use the same language and tone as the original text.
+      
+      """
+      ${selectedText}
+      """
+      
+      No need to answer other thing other than the paraphrased text. And do not include the triple quotes in the answer.`;
+      break;
+    case 'Expand':
+      prompt = `Expand on the text in triple quotes. Provide more information, examples, and details to elaborate on the text. 
+      Use the same language and tone as the original text.
+      
+      """
+      ${selectedText}
+      """
+      
+      No need to answer other thing other than the expansion. And do not include the triple quotes in the answer.`;
+      break;
+    case 'Fix Grammar':
+      prompt = `Correct the text in triple quotes into Standard English. 
+      Fix any spelling, grammar, or punctuation mistakes. Do not change anything else.
+      
+      """
+      ${selectedText}
+      """
+      
+      No need to answer other thing other than the corrected text. And do not include the triple quotes in the answer.`;
+      break;
+    default:
+      console.log('No type selected');
+      return false;
   }
-  return selectedText;
+  const stream = await model.stream(prompt);
+  const chunks = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk);
+    setAnswer(chunks.join(''));
+  }
+  return true;
 };

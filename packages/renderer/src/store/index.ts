@@ -25,7 +25,6 @@ const selectedNoteAtomAsync = atom(async get => {
 
   if (!notes || selectedNoteIndex == null) return null;
   const selectedNote = notes[selectedNoteIndex];
-  console.log('selectedNote', selectedNote.basename);
 
 
   return selectedNote
@@ -53,7 +52,6 @@ export const saveNoteAtom = atom(null, async (get, set, content: NoteContent) =>
     return;
   }
 
-  console.info("New content:", content);
   await window.context.writeNote(selectedNote.metadata.title, content);
 
   set(

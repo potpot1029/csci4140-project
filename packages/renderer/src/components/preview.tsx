@@ -38,12 +38,10 @@ export const Preview = ({content, className, ...props}: PreviewProps) => {
         },
         a(props) {
           // if className includes internal then it's a link to a note
-          console.log('props', props);
           if (props.className && props.className.includes('internal')) {
             const {notes, selectedNoteIndex, handleNoteSelect} = useNotesList({});
             const note = notes!.find(note => note.metadata.title === props.href!.slice(2));
             if (note) {
-              console.log('note', note, props.href!.slice(2));
               return (
                 <a
                   {...props}

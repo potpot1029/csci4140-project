@@ -17,7 +17,6 @@ import {cn} from '../utils';
 import {VectorStoreDocument} from './chatbot/llm/vectorDB-manager';
 import ChainManager from './chatbot/llm/chain-manager';
 import EmbeddingManager from './chatbot/llm/embedding-manager';
-import {set} from 'lodash';
 
 export type MainPageProps = {
   dbVectorStores: PouchDB.Database<VectorStoreDocument> | null;
@@ -30,8 +29,8 @@ export const MainPage = ({dbVectorStores, chainManager, embeddingsManager}: Main
   const [showChat, setShowChat] = useState<boolean>(false);
   const [showNotes, setShowNotes] = useState<boolean>(true);
   const [showList, setShowList] = useState<boolean>(true);
+  const [label, setLabel] = useState<string>('');
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [userInput, setUserInput] = useState<string>('');
   const [aiResponse, setAiResponse] = useState<string>('');
 
   // handle selecting text, open context menu when right click on the note area
@@ -47,20 +46,22 @@ export const MainPage = ({dbVectorStores, chainManager, embeddingsManager}: Main
     window.addEventListener('contextmenu', handleContextMenu);
   }, []);
 
-  // react to summarize text event
+  // react to ai text event after clicking on the context menu
   useEffect(() => {
-    const handleSummarize = async selectedText => {
-      console.log('[handle Sumamrize] Selected Text:', selectedText);
+    const handleAItext = async (selectedText: string, label: string) => {
+      console.log('[handle Sumamrize] Selected Text:', selectedText, label);
       if (!selectedText) return;
-      setUserInput(selectedText);
+      setLabel(label);
       setShowModal(true);
-      const summary = await simpleAIAnswer(selectedText, 'summarize', setAiResponse);
-      console.log('Summary:', summary);
+      const response = await simpleAIAnswer(selectedText, label, setAiResponse);
+      if (!response) {
+        setAiResponse('Error. Please try again.');
+      }
     };
-    const summarizeListener = window.ipcRenderer.receive('summarize-text', handleSummarize);
+    const aiTextListener = window.ipcRenderer.receive('ai-text', handleAItext);
 
     return () => {
-      summarizeListener();
+      aiTextListener();
     };
   }, []);
 
@@ -72,8 +73,10 @@ export const MainPage = ({dbVectorStores, chainManager, embeddingsManager}: Main
           isOpen={showModal}
           setIsOpen={setShowModal}
         >
-          <h3 className='font-bold italic'>Summary by Llama3</h3>
-          <div>{aiResponse == '' ? 'Summarizing...' : aiResponse}</div>
+          <h3 className="font-bold italic">{label}</h3>
+          <div className="w-full">
+            {aiResponse == '' ? 'Generating...' : aiResponse}
+          </div>
         </Modal>
       ) : null}
       <header className="absolute inset-0 h-8 bg-transparent  w-0" />
