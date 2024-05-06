@@ -17,7 +17,17 @@ body {
   @apply overflow-hidden;
 }
 
-.cm-line { z-index: 0 }
+ol {
+  @apply list-decimal;
+}
+
+ul {
+  @apply list-disc;
+}
+
+.cm-line {
+  z-index: 0;
+}
 
 /* hiding scrollbar */
 ::-webkit-scrollbar {
