@@ -27,7 +27,7 @@ export const Content = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({children, className, ...props}, ref) => (
     <div
       ref={ref}
-      className={twMerge('overflow-auto', className)}
+      className={twMerge('overflow-auto bg-zinc-700', className)}
       {...props}
     >
       {children}

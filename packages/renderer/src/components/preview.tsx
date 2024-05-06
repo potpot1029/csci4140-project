@@ -5,7 +5,7 @@ import {defaultSchema} from 'hast-util-sanitize';
 import RemarkCode from './remark-code';
 import remarkGfm from 'remark-gfm';
 import wikiLinkPlugin from 'remark-wiki-link';
-import 'github-markdown-css/github-markdown.css';
+import 'github-markdown-css/github-markdown-dark.css';
 import {useAtomValue, useSetAtom} from 'jotai';
 import {createEmptyNoteAtom, selectedNoteAtom} from '../store';
 import {twMerge} from 'tailwind-merge';

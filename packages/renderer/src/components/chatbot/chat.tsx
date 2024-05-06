@@ -247,9 +247,9 @@ export const Chat = ({chainManager, dbVectorStores, embeddingsManager}: ChatProp
           value={currentChain}
           onChange={handleSelectChain}
         >
-          <option value="llm_chain">Chat</option>
-          <option value="long_note_qa_chain">Chat with a long note</option>
-          <option value="vault_qa_chain">Chat with your vault</option>
+          <option className="bg-zinc-700" value="llm_chain">Chat</option>
+          <option className="bg-zinc-700" value="long_note_qa_chain">Chat with a long note</option>
+          <option className="bg-zinc-700" value="vault_qa_chain">Chat with your vault</option>
         </select>
         <div className="w-full mt-2 flex flex-row">
           <Button

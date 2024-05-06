@@ -81,7 +81,7 @@ export const MainPage = ({dbVectorStores, chainManager, embeddingsManager}: Main
       ) : null}
       <header className="absolute inset-0 h-8 bg-transparent  w-0" />
       {showList ? (
-        <Sidebar className="pt-7 flex-[0_0_15%] border-[0.001px] border-neutral-700 z-50">
+        <Sidebar className="flex-[0_0_15%] border-[0.001px] border-neutral-700 z-50">
           <ButtonsRow className="bg-zinc-800 px-1 py-1 sticky self-start overflow-y-auto top-0" />
           <NotesList
             className="space-y-1"
@@ -104,9 +104,6 @@ export const MainPage = ({dbVectorStores, chainManager, embeddingsManager}: Main
             setShowChat={setShowChat}
             showList={showList}
             setShowList={setShowList}
-            className={cn('', {
-              'pl-16': !showList,
-            })}
           />
         </div>
         <NoteTitle
