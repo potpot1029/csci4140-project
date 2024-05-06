@@ -51,7 +51,7 @@ const App = () => {
       }
       catch (error) {
         console.error('Error testing model and embedding:', error);
-        setError('Error testing model and embedding. Please make sure you have install them:' + error);
+        setError('Error testing model and embedding. Please make sure you have install them. ' + error);
         return false;
       }
 

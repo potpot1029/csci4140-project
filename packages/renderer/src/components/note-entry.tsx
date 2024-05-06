@@ -43,7 +43,7 @@ export const NoteEntry = ({
         />
       </div>
       <div
-        className="h-full"
+        className="h-full text-nowrap overflow-hidden"
         style={{
           fontSize: '16px',
         }}

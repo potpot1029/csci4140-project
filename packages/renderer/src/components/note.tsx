@@ -6,6 +6,7 @@ import lodash from 'lodash';
 import {NoteContent} from '@shared/models';
 const {throttle} = lodash;
 import {autoSavingTime} from '@shared/constants';
+import { cn } from '../utils';
 
 export type NoteProps = {
   showNotes: boolean;
@@ -13,8 +14,6 @@ export type NoteProps = {
 export const Note = ({showNotes, ...props}: NoteProps) => {
   const selectedNote = useAtomValue(selectedNoteAtom);
   const saveNote = useSetAtom(saveNoteAtom);
-
-
 
   useEffect(() => {
     if (!selectedNote) return;
@@ -36,16 +35,18 @@ export const Note = ({showNotes, ...props}: NoteProps) => {
     },
   );
 
-
-
   return (
     <div className="flex flex-row">
-      <Editor
-        key={selectedNote.metadata.title}
-        onChange={handleAutoSaving}
-      />
+      {showNotes ? (
+        <Editor
+          className="flex-[0_0_50%]"
+          key={selectedNote.metadata.title}
+          onChange={handleAutoSaving}
+        />
+      ) : null}
       <Preview
-        className="bg-transparent p-2 overflow-auto text-slate-300"
+        className={cn("bg-transparent p-2 overflow-auto text-slate-300", 
+          { 'flex-[0_0_50%]': showNotes, 'flex-1': !showNotes })}
         content={selectedNote.content}
       />
     </div>

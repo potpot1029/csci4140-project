@@ -1,4 +1,4 @@
-# CSCI4140 Project: TwoBrains
+# NoteAI: A course project for CSCI4140
 
 This project is a course project for CSCI4140 - Open-source Software Project Development. In this project, I aim to build a simple markdown note editor equipped with large language models (LLM) to enhance the note taking experience of the users.
 
@@ -13,9 +13,9 @@ This project is built with:
 
 ## Get Started
 
-For now, you have to set the directory for your notes in `packages/shared/constants.ts`.
+For now, you have to set the directory (full path) for your notes in `packages/shared/constants.ts`.
 ```typescript
-export const appDirectoryName = "'~/TwoBrain'";
+export const appDirectoryName = "";
 ```
 
 Install [Ollama](https://ollama.com/) and download Llama3 locally using the following command:
